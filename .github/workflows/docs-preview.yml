@@ -4,12 +4,11 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, closed]
+  push:
 
 jobs:
   build-html:
-    if:
-      contains(github.event.action, "opened") or contains(github.event.action,
-      "synchronize")
+    if: ${{ github.event.pull_request.action == 'opened' || github.event.pull_request.action == 'synchronize' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -31,18 +30,27 @@ jobs:
           pushd docs
           make html
           popd
+      - name: HTML directory for merge
+        if: github.ref == 'refs/heads/main'
+        run: echo ::set-env name=HTML_DIR::"main"
+      - name: HTML directory for review
+        if: github.ref != 'refs/heads/main'
+        run: echo ::set-env name=HTML_DIR::${{ format('review/branch-{0}', github.ref_name) }}
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.2.5
         with:
           branch: gh-pages
           folder: docs/build/html
-          target-folder: review/pr-${{ github.event.number }}
+          target-folder: ${{ env.HTML_DIR }}
 
   remove-html:
-    if: contains(github.event.action, "closed")
+    if: ${{ github.event.pull_request.action == 'closed' && github.ref != 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        ref: gh-pages
+        with:
+          ref: gh-pages
+      - name: HTML directory for review
+        run: echo ::set-env name=HTML_DIR::${{ format('review/branch-{0}', github.ref_name) }}
       - name: Delete preview HTML
-        run: rm -rf review/pr-${{ github.event.number }}
+        run: rm -rf ${{ env.HTML_DIR }}
