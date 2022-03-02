@@ -24,6 +24,8 @@ More headings
 
 * How do we add a comment to the PR with the URL to the preview?
 
+* Let's see what happens when I merge a PR. Does the action remove the review directory?
+
 
 Indices and tables
 ==================
