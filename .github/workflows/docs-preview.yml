@@ -44,7 +44,7 @@ jobs:
           target-folder: ${{ env.HTML_DIR }}
 
   remove-html:
-    if: ${{ github.event.pull_request.action == 'closed' && github.ref != 'refs/heads/main' }}
+    if: ${{ github.event.pull_request.merged == true && github.ref != 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
