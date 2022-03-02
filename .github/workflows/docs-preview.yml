@@ -56,8 +56,8 @@ jobs:
         run: rm -rf ${{ env.HTML_DIR }}
       - name: Commit deleted directory
         run: |
-          git config user.name docs-review
+          git config user.name docs-preview
           git config user.email do-not-send@github.com
           git add .
-          git commit -m "Removing review branch"
+          git commit -m 'Removing HTML review directory...${{ env.HTML_DIR }}'
           git push
