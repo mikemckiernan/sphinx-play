@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-html:
-    if: ${{ github.event.pull_request.action == 'opened' || github.event.pull_request.action == 'synchronize' }}
+    if: ${{ github.event.pull_request.action == 'opened' || github.event.pull_request.action == 'synchronize' || github.event_name == 'push' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
