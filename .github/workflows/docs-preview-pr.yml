@@ -27,3 +27,7 @@ jobs:
               repo: context.repo.repo,
               body: comment
             })
+
+            const pages_url = context.repo.url + "/pages"
+            const resp = await github.request(pages_url)
+            console.log(resp.data)
