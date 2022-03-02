@@ -17,6 +17,13 @@ jobs:
           script: |
             const comment = '## HTML Build\n' +
                'https://mikemckiernan.github.io/sphinx-play/review/branch-' +
-               context.payload.pull_request.head.label
+               context.payload.pull_request.head.ref
 
             console.log(comment)
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            })
