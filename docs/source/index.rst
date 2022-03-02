@@ -27,6 +27,11 @@ Trying again.
 The HTML review directory is deleted.
 Now, check if the HTML review directory is identified in the commit message.
 
+Add a separate workflow
+-----------------------
+
+I added a second workflow so that I can understand the pull_request event better.
+
 
 More headings
 -------------
