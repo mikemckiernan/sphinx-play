@@ -32,10 +32,10 @@ jobs:
           popd
       - name: HTML directory for merge
         if: github.ref == 'refs/heads/main'
-        run: echo ::set-env name=HTML_DIR::"main"
+        run: echo "HTML_DIR=main" >> $GITHUB_ENV
       - name: HTML directory for review
         if: github.ref != 'refs/heads/main'
-        run: echo ::set-env name=HTML_DIR::${{ format('review/branch-{0}', github.ref_name) }}
+        run: echo "HTML_DIR=review/branch-${GITHUB_REF_NAME}" >> $GITHUB_ENV
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
@@ -51,6 +51,6 @@ jobs:
         with:
           ref: gh-pages
       - name: HTML directory for review
-        run: echo ::set-env name=HTML_DIR::${{ format('review/branch-{0}', github.ref_name) }}
+        run: echo "HTML_DIR=review/branch-${GITHUB_REF_NAME}" >> $GITHUB_ENV
       - name: Delete preview HTML
         run: rm -rf ${{ env.HTML_DIR }}
