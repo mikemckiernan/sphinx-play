@@ -37,7 +37,7 @@ jobs:
         if: github.ref != 'refs/heads/main'
         run: echo ::set-env name=HTML_DIR::${{ format('review/branch-{0}', github.ref_name) }}
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.2.5
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
           branch: gh-pages
           folder: docs/build/html
