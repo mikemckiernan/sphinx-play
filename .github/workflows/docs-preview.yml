@@ -54,3 +54,10 @@ jobs:
         run: echo "HTML_DIR=review/branch-${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
       - name: Delete preview HTML
         run: rm -rf ${{ env.HTML_DIR }}
+      - name: Commit deleted directory
+        run: |
+          git config user.name docs-review
+          git config user.email do-not-send@github.com
+          git add .
+          git commit -m "Removing review branch"
+          git push
