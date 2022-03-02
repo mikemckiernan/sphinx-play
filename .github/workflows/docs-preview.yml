@@ -51,6 +51,6 @@ jobs:
         with:
           ref: gh-pages
       - name: HTML directory for review
-        run: echo "HTML_DIR=review/branch-${GITHUB_REF_NAME}" >> $GITHUB_ENV
+        run: echo "HTML_DIR=review/branch-${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
       - name: Delete preview HTML
         run: rm -rf ${{ env.HTML_DIR }}
