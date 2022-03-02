@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-html-pr:
-    if: ${{ github.event.pull_request.action == 'opened' }}
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
     runs-on: ubuntu-latest
     steps:
       - name: Information
