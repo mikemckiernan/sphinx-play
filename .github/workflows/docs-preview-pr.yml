@@ -8,8 +8,6 @@ jobs:
   build-html-pr:
     if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
     runs-on: ubuntu-latest
-    env:
-      PAGES_URL: "${GITHUB_API_URL}/${GITHUB_REPOSITORY}/pages"
     steps:
       - name: Information
         run: echo  'PR \#${{ github.event.pull_request.number }} from ${{ github.event.pull_request.head.label }}'
@@ -30,5 +28,6 @@ jobs:
               body: comment
             })
 
-            const resp = await github.request(env.PAGES_URL)
+            const pages_url = [process.env.GITHUB_API_URL, process.env.GITHUB_REPOSITORY, "pages"].join("/")
+            const resp = await github.request(pages_url)
             console.log(resp.data)
