@@ -28,6 +28,6 @@ jobs:
               body: comment
             })
 
-            const pages_url = [process.env.GITHUB_API_URL, process.env.GITHUB_REPOSITORY, "pages"].join("/")
+            const pages_url = [process.env.GITHUB_API_URL, "repos", process.env.GITHUB_REPOSITORY, "pages"].join("/")
             const resp = await github.request(pages_url)
             console.log(resp.data)
