@@ -1,8 +1,7 @@
-name: docs-preview
+name: docs-preview-pr
 
 on:
   pull_request:
-    branches: [main]
     types: [opened, synchronize, closed]
 
 jobs:
