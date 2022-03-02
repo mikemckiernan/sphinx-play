@@ -1,0 +1,29 @@
+name: docs-preview
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, closed]
+
+jobs:
+  build-html-pr:
+    if: ${{ github.event.pull_request.action == 'opened' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Information
+        run: echo  'PR # ${{ github.event.pull_request.number }} from ${{ github.event.pull_request.head.label }}'
+      - name: Add comment to PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+           const comment = '## HTML Build\n' +
+            'https://mikemckiernan.github.io/sphinx-play/review/branch-' +
+            github.event.pull_request.head.label
+
+           github.rest.issues.createComment({
+             issue_number: context.issue.number,
+             owner: context.repo.owner,
+             repo: context.repo.repo,
+             body: comment
+           })
+
