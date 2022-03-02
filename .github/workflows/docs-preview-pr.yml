@@ -17,6 +17,6 @@ jobs:
           script: |
             const comment = '## HTML Build\n' +
                'https://mikemckiernan.github.io/sphinx-play/review/branch-' +
-               github.event.pull_request.head.label
+               context.payload.pull_request.head.label
 
             console.log(comment)
