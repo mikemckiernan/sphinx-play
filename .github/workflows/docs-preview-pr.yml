@@ -8,14 +8,14 @@ jobs:
   build-html-pr:
     if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
     runs-on: ubuntu-latest
+    env:
+      PAGES_URL: "${GITHUB_API_URL}/${GITHUB_REPOSITORY}/pages"
     steps:
       - name: Information
         run: echo  'PR \#${{ github.event.pull_request.number }} from ${{ github.event.pull_request.head.label }}'
       - name: Add comment to PR
         uses: actions/github-script@v6
         with:
-          env:
-            PAGES_URL: "${GITHUB_API_URL}/${GITHUB_REPOSITORY}/pages"
           script: |
             const comment = '## HTML Build\n' +
                'https://mikemckiernan.github.io/sphinx-play/review/branch-' +
