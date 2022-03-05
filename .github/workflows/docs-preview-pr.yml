@@ -106,7 +106,7 @@ jobs:
           git commit -m 'Adding HTML to review directory.' || (echo "Nothing changed." && exit 0)
           git push
       - name: Add HTML review URL comment to PR
-        # if: github.event.action == 'opened'
+        if: github.event.action == 'opened'
         uses: actions/github-script@v5
         env:
           URL: ${{ needs.get-gh-pages-url.outputs.url }}
