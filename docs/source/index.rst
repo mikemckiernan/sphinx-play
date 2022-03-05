@@ -36,6 +36,13 @@ in the GitHub UI, but it is not reported in the events that can be downloaded wi
 
 Regardless, I'll make believe that workflows for the `pull_request` type are run after each push.
 
+Pushes to a branch that has an open PR seem to run the actions again.
+In the case of this workflow, the HTML is build again and deployed.
+
+Let's see if it can be deployed more than once.
+Let's also see if the comment is added to the PR when the PR is opened.
+The comment is supposed to contain a URL to the proposed documentation change.
+
 
 Add a separate workflow
 -----------------------
