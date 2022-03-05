@@ -9,7 +9,7 @@ jobs:
 
   # Check that the proposed code builds to HTML without errors.
   build-html:
-    if: github.event.pull_request.action != 'closed'
+    if: github.event.action != 'closed'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -73,7 +73,7 @@ jobs:
   store-html:
     runs-on: ubuntu-latest
     needs: [build-html, get-gh-pages-url]
-    if: needs.get-gh-pages-url.outputs.url != ''
+    if: needs.get-gh-pages-url.outputs.url != '' && github.event.action != 'closed'
     env:
       PR_NO: ${{ github.event.pull_request.number }}
     steps:
@@ -121,10 +121,9 @@ jobs:
               repo: context.repo.repo,
               body: comment
             })
-          
 
   remove-html:
-    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref != 'main'
+    if: needs.get-gh-pages-url.outputs.url != '' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     needs: [get-gh-pages-url]
     env:
@@ -137,8 +136,6 @@ jobs:
         run: |
           git config user.name docs-preview
           git config user.email do-not-send-@github.com
-          git rm -r review/pr-${PR_NO}
-          git commit -m 'Removing HTML review directory.'
+          git rm -r review/pr-${PR_NO} || true
+          git commit -m 'Removing HTML review directory.' || (echo "Nothing changed." && exit 0)
           git push
-        env:
-          PR_NO: ${{ github.event.pull_request.number }}
