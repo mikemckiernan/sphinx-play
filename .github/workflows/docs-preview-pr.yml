@@ -69,11 +69,13 @@ jobs:
             core.setOutput('branch', '')
 
   # Identify the dir for the HTML.
-  # TODO: Use the PR number rather than the branch.
+  # TODO: Handle merge to main after merging a PR
   store-html:
     runs-on: ubuntu-latest
     needs: [build-html, get-gh-pages-url]
     if: needs.get-gh-pages-url.outputs.url != ''
+    env:
+      PR_NO: ${{ github.event.pull_request.number }}
     steps:
       # If this is a push event to main, such as a merge from a PR...
       - name: Set HTML dir for merges to main
@@ -86,31 +88,35 @@ jobs:
         run: |
           echo "HTML_DIR=review/pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
           echo "Setting HTML dir for PR to: " ${{ env.HTML_DIR }}
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ needs.get-gh-pages-url.outputs.branch }}
       - uses: actions/download-artifact@v2
         id: download
         with:
           name: html-build-artifact
-          path: artifacts
+          path: review/pr-${PR_NO}
       - name: List files
-        run: ls -asl artifacts
+        run: ls -asl review/pr-${PR_NO}
       - name: Deploy HTML
-        uses: JamesIves/github-pages-deploy-action@v4.2.5
-        with:
-          branch: ${{ needs.get-gh-pages-url.outputs.branch }}
-          folder: ${{ steps.download.outputs.download-path }}
-          target-folder: ${{ env.HTML_DIR }}
-      - name: Add HTML review URL to PR
+        run:
+          git config user.name docs-preview
+          git config user.email do-not-send-@github.com
+          git add review/pr-${PR_NO}
+          git commit -m 'Removing HTML review directory.'
+          git push
+      - name: Add HTML review URL comment to PR
         if: github.event.pull_request.action == 'opened'
         run: |
           echo "URL=$(echo ${{ needs.get-gh-pages-url.outputs.url }}/review/pr-${PR_NO})" >> $GITHUB_ENV
           gh pr comment ${PR_NO} --body "## Documentation preview\n${env.URL}"
-        env:
-          PR_NO: ${{ github.event.pull_request.number }}
 
   remove-html:
     if: github.event.pull_request.merged == true && github.event.pull_request.head.ref != 'main'
     runs-on: ubuntu-latest
     needs: [get-gh-pages-url]
+    env:
+      PR_NO: ${{ github.event.pull_request.number }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -119,6 +125,8 @@ jobs:
         run: |
           git config user.name docs-preview
           git config user.email do-not-send-@github.com
-          git rm -r review/pr-${{ github.event.pull_request.number }}
+          git rm -r review/pr-${PR_NO}
           git commit -m 'Removing HTML review directory.'
           git push
+        env:
+          PR_NO: ${{ github.event.pull_request.number }}
