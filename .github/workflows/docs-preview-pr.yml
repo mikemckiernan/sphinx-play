@@ -108,10 +108,12 @@ jobs:
       - name: Add HTML review URL comment to PR
         # if: github.event.action == 'opened'
         uses: actions/github-script@v5
+        env:
+          URL: ${{ needs.get-gh-pages-url.outputs.url }}
         with:
           script: |
             const comment = '## Documentation preview\n' +
-              '<' + '${{ needs.get-gh-pages-url.outputs.url }}' + process.env.HTML_DIR + '>'
+              '<' + process.env.URL + process.env.HTML_DIR + '>'
             console.log(comment)
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -119,6 +121,7 @@ jobs:
               repo: context.repo.repo,
               body: comment
             })
+          
 
   remove-html:
     if: github.event.pull_request.merged == true && github.event.pull_request.head.ref != 'main'
