@@ -43,6 +43,16 @@ Let's see if it can be deployed more than once.
 Let's also see if the comment is added to the PR when the PR is opened.
 The comment is supposed to contain a URL to the proposed documentation change.
 
+Regarding the comment with the URL to the proposed changes, I had a boo-boo
+in my logic:
+
+.. code-block:: yaml
+
+   if: github.event.pull_request.action == 'opened'
+
+Silly me.  The `action` field is not a child of the `pull_request`.
+It is a child of `github.event`.
+
 
 Add a separate workflow
 -----------------------
