@@ -103,7 +103,7 @@ jobs:
           git config user.name docs-preview
           git config user.email do-not-send-@github.com
           git add review/pr-${PR_NO}
-          git commit -m 'Adding HTML to review directory.' || exit 0
+          git commit -m 'Adding HTML to review directory.' || (echo "Nothing changed." && exit 0)
           git push
       - name: Add HTML review URL comment to PR
         # if: github.event.action == 'opened'
