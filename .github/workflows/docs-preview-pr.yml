@@ -99,7 +99,7 @@ jobs:
       - name: List files
         run: ls -asl review/pr-${PR_NO}
       - name: Deploy HTML
-        run:
+        run: |
           git config user.name docs-preview
           git config user.email do-not-send-@github.com
           git add review/pr-${PR_NO}
