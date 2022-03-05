@@ -59,6 +59,7 @@ jobs:
                 console.log("  ..and deployed from branch: " + resp.data.source.branch)
                 core.setOutput('html_url', resp.data.html_url)
                 core.setOutput('branch', resp.data.source.branch)
+                return
               }
               console.log(resp)
             } catch (err) {
