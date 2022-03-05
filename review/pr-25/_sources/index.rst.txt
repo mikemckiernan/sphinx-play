@@ -21,9 +21,9 @@ The goal is to add some automation to GitHub projects for documentation.
 
 - [ ] When I close a PR, remove the review HTML from GitHub Pages.
 
-TODO:
+- [ ] When I merge a PR, rebuild the documentation, and update the ``main`` directory for GitHub Pages.
 
-- [ ] When I merge a PR, rebuild the documentation (or copy?), and move it into the ``main`` directory for GitHub Pages.
+The workflow only runs on pull requests that are based from the ``main`` branch.
 
 
 Some things I learned
