@@ -106,7 +106,7 @@ jobs:
           git commit -m 'Adding HTML to review directory.'
           git push
       - name: Add HTML review URL comment to PR
-        # if: github.event.pull_request.action == 'opened'
+        if: github.event.action == 'opened'
         run: |
           echo "URL=$(echo ${{ needs.get-gh-pages-url.outputs.url }}/review/pr-${PR_NO})" >> $GITHUB_ENV
           gh pr comment ${PR_NO} --body "## Documentation preview\n${env.URL}"
