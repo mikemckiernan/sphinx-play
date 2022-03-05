@@ -107,9 +107,20 @@ jobs:
           git push
       - name: Add HTML review URL comment to PR
         # if: github.event.action == 'opened'
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const comment = '## Documentation preview\n' +
+              '<' + needs.get-gh-pages-url.outputs.url + process.env.HTML_DIR + '>'
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            })
         run: |
           echo "URL=$(echo ${{ needs.get-gh-pages-url.outputs.url }}review/pr-${{ env.PR_NO }})" >> $GITHUB_ENV
-          gh pr comment ${PR_NO} --body "## Documentation preview\n${{ env.URL }}"
+          gh pr comment "${PR_NO}" --body "## Documentation preview\n${{ env.URL }}"
 
   remove-html:
     if: github.event.pull_request.merged == true && github.event.pull_request.head.ref != 'main'
