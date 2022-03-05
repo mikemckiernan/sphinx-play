@@ -10,22 +10,24 @@ Welcome to sphinx-play's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-Any heading at all
-------------------
+GitHub workflows for documentation
+----------------------------------
 
-Add any content.
+The goal is to add some automation to GitHub projects for documentation.
+
+- [ ] When I open a PR, build the documentation, add it to GitHub Pages, and update the PR with a comment that includes a review URL.
+
+- [ ] When I push updates to a PR, rebuild the documentation.
+
+- [ ] When I close a PR, remove the review HTML from GitHub Pages.
+
+- [ ] When I merge a PR, rebuild the documentation, and update the ``main`` directory for GitHub Pages.
+
+The workflow only runs on pull requests that are based from the ``main`` branch.
 
 
-Add a para.
-
-Hello from branch docs-hello.
-
-Let's see if the workflow identifies the review branch to delete.
-It didn't.
-Trying again.
-
-The HTML review directory is deleted.
-Now, check if the HTML review directory is identified in the commit message.
+Some things I learned
+---------------------
 
 I cannot explain why, but the `synchronize` state for a `pull_request` is reported
 in the GitHub UI, but it is not reported in the events that can be downloaded with `curl`:
@@ -34,14 +36,8 @@ in the GitHub UI, but it is not reported in the events that can be downloaded wi
 
    curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/mikemckiernan/sphinx-play/events
 
-Regardless, I'll make believe that workflows for the `pull_request` type are run after each push.
-
 Pushes to a branch that has an open PR seem to run the actions again.
 In the case of this workflow, the HTML is build again and deployed.
-
-Let's see if it can be deployed more than once.
-Let's also see if the comment is added to the PR when the PR is opened.
-The comment is supposed to contain a URL to the proposed documentation change.
 
 Regarding the comment with the URL to the proposed changes, I had a boo-boo
 in my logic:
@@ -52,25 +48,6 @@ in my logic:
 
 Silly me.  The `action` field is not a child of the `pull_request`.
 It is a child of `github.event`.
-
-
-Add a separate workflow
------------------------
-
-I added a second workflow so that I can understand the pull_request event better.
-
-
-PRs that do not trigger a workflow
-----------------------------------
-
-Either GitHub is broken, or I've done something incredibly stupid.
-I can't tell.
-
-
-More headings
--------------
-
-* How do we add a comment to the PR with the URL to the preview?
 
 
 Indices and tables
