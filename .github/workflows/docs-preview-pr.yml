@@ -81,7 +81,7 @@ jobs:
           echo "HTML_DIR=main" >> $GITHUB_ENV
       # If this is a PR...
       - name: Set HTML dir for PRs
-        if: github.event_name == 'pull_request' && github.event.pull_request.action == 'opened'
+        if: github.event_name == 'pull_request'
         run: |
           echo "HTML_DIR=review/pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
           echo "Setting HTML dir for PR to: " ${{ env.HTML_DIR }}
@@ -98,6 +98,13 @@ jobs:
           branch: ${{ needs.get-gh-pages-url.outputs.branch }}
           folder: ${{ steps.download.outputs.download-path }}
           target-folder: ${{ env.HTML_DIR }}
+      - name: Add HTML review URL to PR
+        if: github.event.pull_request.action == 'opened'
+        run: |
+          echo "URL=$(echo ${{ needs.get-gh-pages-url.outputs.url }}/review/pr-${PR_NO})" >> $GITHUB_ENV
+          gh pr comment ${PR_NO} --body "## Documentation preview\n${env.URL}"
+        env:
+          PR_NO: ${{ github.event.pull_request.number }}
 
   remove-html:
     if: github.event.pull_request.merged == true && github.event.pull_request.head.ref != 'main'
