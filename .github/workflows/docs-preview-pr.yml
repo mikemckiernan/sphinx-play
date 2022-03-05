@@ -109,7 +109,7 @@ jobs:
         # if: github.event.action == 'opened'
         run: |
           echo "URL=$(echo ${{ needs.get-gh-pages-url.outputs.url }}review/pr-${{ env.PR_NO }})" >> $GITHUB_ENV
-          gh pr comment ${PR_NO} --body "## Documentation preview\n${env.URL}"
+          gh pr comment ${PR_NO} --body "## Documentation preview\n${{ env.URL }}"
 
   remove-html:
     if: github.event.pull_request.merged == true && github.event.pull_request.head.ref != 'main'
