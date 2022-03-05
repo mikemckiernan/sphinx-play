@@ -86,7 +86,7 @@ jobs:
       - name: Set HTML dir for PRs
         if: github.event_name == 'pull_request'
         run: |
-          echo "HTML_DIR=review/pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          echo "HTML_DIR=review/pr-${PR_NO}" >> $GITHUB_ENV
           echo "Setting HTML dir for PR to: " ${{ env.HTML_DIR }}
       - uses: actions/checkout@v2
         with:
@@ -95,7 +95,7 @@ jobs:
         id: download
         with:
           name: html-build-artifact
-          path: review/pr-${PR_NO}
+          path: ${{ env.HTML_DIR }}
       - name: List files
         run: ls -asl review/pr-${PR_NO}
       - name: Deploy HTML
