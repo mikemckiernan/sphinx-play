@@ -27,6 +27,16 @@ Trying again.
 The HTML review directory is deleted.
 Now, check if the HTML review directory is identified in the commit message.
 
+I cannot explain why, but the `synchronize` state for a `pull_request` is reported
+in the GitHub UI, but it is not reported in the events that can be downloaded with `curl`:
+
+.. code-block:: shell
+
+   curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/mikemckiernan/sphinx-play/events
+
+Regardless, I'll make believe that workflows for the `pull_request` type are run after each push.
+
+
 Add a separate workflow
 -----------------------
 
