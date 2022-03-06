@@ -100,9 +100,10 @@ jobs:
         env:
           URL: ${{ needs.get-gh-pages-url.outputs.url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
-          comment=$(echo '## Documentation preview')
-          comment+=$(echo '<${{ env.URL }}${{ env.HTML_DIR }}>')
+          comment=$(echo -e "## Documentation preview\n")
+          comment+=$(echo "<${{ env.URL }}${{ env.HTML_DIR }}>")
           echo "${comment}"
           gh pr comment ${{ env.PR_NO }} --body "${comment}"
         # uses: actions/github-script@v5
