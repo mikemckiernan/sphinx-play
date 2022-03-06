@@ -25,17 +25,6 @@ The goal is to add some automation to GitHub projects for documentation.
 
 The workflow only runs on pull requests that are based from the ``main`` branch.
 
-Need the workflow to run for outside contributors
--------------------------------------------------
-
-It seems that running the build from the `pull_request` event
-with the limited privileges affored to the `pull_request` event is the best
-practice.  Afterward, upload the HTML as an artifact and have a second
-workflow download the artifact (no repository checkout and no touching
-untrusted code) and perform the upload to the GitHub Pages and whatnot.
-
-See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/.
-
 
 Some things I learned
 ---------------------
