@@ -62,6 +62,10 @@ jobs:
           echo "PR_NO=${PR}" >> $GITHUB_ENV
           echo "MERGE_STATUS=${MERGED}" >> $GITHUB_ENV
 
+          # Remove the pr artifact directory so that it does not
+          # appear in listings or confuse git with untracked files.
+          rm -rf ./pr
+
           ls -asl
 
           ls -asl review
@@ -76,10 +80,10 @@ jobs:
         if: env.MERGE_STATUS == 'false'
         run: |
           echo "HTML_DIR=review/pr-${{ env.PR_NO }}" >> $GITHUB_ENV
-          echo "Setting HTML dir for PR to: " ${{ env.HTML_DIR }}
-      - name: Move HTML files from the download to pages directory
+          echo "Setting HTML dir for PR to: review/pr-${{ env.PR_NO }}"
+      - name: Move HTML files from the artifact to the pages directory
         run: |
-          mkdir review || true 
+          mkdir review 2>/dev/null || true 
           rm -rf "${{ env.HTML_DIR }}"
           mv ./html-build-artifact/ "${{ env.HTML_DIR }}"
           ls -asl "${{ env.HTML_DIR }}"
@@ -98,7 +102,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           comment=$(echo '## Documentation preview')
-          comment+=$(echo '<${URL}${{ env.HTML_DIR }}>')
+          comment+=$(echo '<${{ env.URL }}${{ env.HTML_DIR }}>')
           echo "${comment}"
           gh pr comment ${{ env.PR_NO }} --body "${comment}"
         # uses: actions/github-script@v5
