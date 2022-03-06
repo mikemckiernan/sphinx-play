@@ -64,6 +64,37 @@ Silly me.  The `action` field is not a child of the `pull_request`.
 It is a child of `github.event`.
 
 
+One mystery
+-----------
+
+I'm unsure why the process in the ``store-html`` job somehow
+seems to have missing commits.
+
+.. code-block:: text
+
+   Changes to be committed:
+     (use "git restore --staged <file>..." to unstage)
+           modified:   main/_sources/index.rst.txt
+           modified:   main/index.html
+           modified:   main/searchindex.js
+
+  [gh-pages 3daa0dd] Adding HTML directory.
+   3 files changed, 25 insertions(+), 1 deletion(-)
+   rewrite main/searchindex.js (64%)
+  To https://github.com/mikemckiernan/sphinx-play
+   ! [rejected]        gh-pages -> gh-pages (fetch first)
+  error: failed to push some refs to 'https://github.com/mikemckiernan/sphinx-play'
+  hint: Updates were rejected because the remote contains work that you do
+  hint: not have locally. This is usually caused by another repository pushing
+  hint: to the same ref. You may want to first integrate the remote changes
+  hint: (e.g., 'git pull ...') before pushing again.
+  hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+  Error: Process completed with exit code 1.
+
+There's something that I need to learn about Git.
+I have a misconception that a checkout would get the latest work.
+
+
 Indices and tables
 ==================
 
