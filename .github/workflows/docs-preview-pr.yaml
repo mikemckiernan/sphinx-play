@@ -51,6 +51,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ needs.get-gh-pages-url.outputs.branch }}
+      - name: Initialize Git configuration
+        run: |
+          git config user.name docs-preview
+          git config user.email do-not-send-@github.com
       - name: Download artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,35 +72,44 @@ jobs:
           # appear in listings or confuse git with untracked files.
           rm -rf ./pr
 
-      # If this is a push event to main, such as a merge from a PR, store in directory main.
-      - name: Set HTML dir for merges to main
+      # Permutations:
+      # - PR was merged, then PR_ACTION is closed, need to delete review directory.
+      # - PR was updated, PR_ACTION is !closed, need to delete review dir and update it.
+      # - PR was closed but not merged, PR_ACTION is closed and MERGE_STATUS is false, need to delete review dir.
+
+      # If the PR was merged, store in directory main.
+      - name: Handle HTML for merges to main
         if: env.MERGE_STATUS == 'true'
         run: |
-          echo "HTML_DIR=main" >> $GITHUB_ENV
-      # If this is a PR, store in a directory with pattern review/pr-${PR_NO}.
-      - name: Set HTML dir for PRs
-        if: env.MERGE_STATUS == 'false'
+          rm -rf main 2>/dev/null || true
+          mv ./html-build-artifact/  main
+          git add main
+      # If this PR is still open, store HTML in a review directory.
+      - name: Handle HTML review dir for open PRs
+        if: env.MERGE_STATUS == 'false' && env.PR_ACTION != 'closed'
         run: |
-          echo "HTML_DIR=review/pr-${{ env.PR_NO }}" >> $GITHUB_ENV
-          echo "Setting HTML dir for PR to: review/pr-${{ env.PR_NO }}"
-      - name: Move HTML files from the artifact to the pages directory
+          rm -rf "review/pr-${{ env.PR_NO }}" 2>/dev/null || true
+          mv ./html-build-artifact/ "review/pr-${{ env.PR_NO }}"
+          git add "review/pr-${{ env.PR_NO }}"
+      # If the PR was closed, merged or not, delete review directory.
+      - name: Delete HTML review directory for closed PRs
+        if: env.PR_ACTION == 'closed'
         run: |
-          mkdir review 2>/dev/null || true 
-          rm -rf "${{ env.HTML_DIR }}"
-          mv ./html-build-artifact/ "${{ env.HTML_DIR }}"
-          ls -asl "${{ env.HTML_DIR }}"
-      - name: Deploy HTML
+          if [ -d ./html-build-artifact/ ]; then
+            rm -rf ./html-build-artifact/ 2>/dev/null
+          fi
+          if [ -d "review/pr-${{ env.PR_NO }}" ]; then
+            git rm -rf "review/pr-${{ env.PR_NO }}"
+          fi
+      - name: Commit changes to the GitHub Pages branch
         run: |
-          git config user.name docs-preview
-          git config user.email do-not-send-@github.com
-          git add "${{ env.HTML_DIR }}"
           git status
-          if git commit -m 'Adding HTML directory.'; then
+          if git commit -m 'Pushing changes to GitHub Pages.'; then
             git push -f
           else 
            echo "Nothing changed."
           fi
-      - name: Add HTML review URL comment to PR
+      - name: Add HTML review URL comment to a newly opened PR
         if: env.MERGE_STATUS == 'false' && env.PR_ACTION == 'opened'
         env:
           URL: ${{ needs.get-gh-pages-url.outputs.url }}
@@ -109,28 +122,3 @@ jobs:
           cat body
           gh pr comment ${{ env.PR_NO }} --body-file body
           
-  remove-html:
-    runs-on: ubuntu-latest
-    needs: [get-gh-pages-url]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ needs.get-gh-pages-url.outputs.branch }}
-      - name: Download PR artifact
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh run view "${WF_ID}"
-          gh run download "${WF_ID}" -n pr -D pr
-          PR=$(cat ./pr/pr.txt)
-          MERGED=$(cat ./pr/merged.txt)
-          echo "PR_NO=${PR}" >> $GITHUB_ENV
-          echo "MERGE_STATUS=${MERGED}" >> $GITHUB_ENV
-      - name: Delete and commit HTML review directory
-        if: env.MERGE_STATUS == 'true'
-        run: |
-          git config user.name docs-preview
-          git config user.email do-not-send-@github.com
-          git rm -r review/pr-${{ env.PR_NO }}
-          git commit -m 'Removing HTML review directory.'
-          git push
