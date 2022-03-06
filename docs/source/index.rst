@@ -26,6 +26,20 @@ The goal is to add some automation to GitHub projects for documentation.
 The workflow only runs on pull requests that are based from the ``main`` branch.
 
 
+Security considerations
+-----------------------
+
+The initial attempt worked for pushes and PRs by someone with access to push to the repo.
+For public repositories, it is important to have the documentation workflow operate for forks.
+
+The complicating factor is that it is very helpful to add a comment to the PR with the URL
+of the documentation preview.
+However, adding a comment to a PR is a privileged operation that requires ``write`` permission to the ``issue`` type.
+The suggested method for limiting the risk is covered in the following blog post:
+
+https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+
+
 Some things I learned
 ---------------------
 
