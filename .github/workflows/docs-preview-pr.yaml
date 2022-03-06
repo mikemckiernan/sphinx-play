@@ -59,16 +59,14 @@ jobs:
           gh run download "${WF_ID}"
           PR=$(cat ./pr/pr.txt)
           MERGED=$(cat ./pr/merged.txt)
+          ACTION=$(cat ./pr/action.txt)
           echo "PR_NO=${PR}" >> $GITHUB_ENV
           echo "MERGE_STATUS=${MERGED}" >> $GITHUB_ENV
+          echo "PR_ACTION=${ACTION}" >> $GITHUB_ENV
 
           # Remove the pr artifact directory so that it does not
           # appear in listings or confuse git with untracked files.
           rm -rf ./pr
-
-          ls -asl
-
-          ls -asl review
 
       # If this is a push event to main, such as a merge from a PR, store in directory main.
       - name: Set HTML dir for merges to main
@@ -96,7 +94,7 @@ jobs:
           git commit -m 'Adding HTML directory.' || (echo "Nothing changed." && exit 0)
           git push
       - name: Add HTML review URL comment to PR
-        if: env.MERGE_STATUS == 'false'
+        if: env.MERGE_STATUS == 'false' && env.PR_ACTION == 'opened'
         env:
           URL: ${{ needs.get-gh-pages-url.outputs.url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -107,18 +105,6 @@ jobs:
           echo -e "<${{ env.URL }}${{ env.HTML_DIR }}>" >> body
           cat body
           gh pr comment ${{ env.PR_NO }} --body-file body
-        # uses: actions/github-script@v5
-        # with:
-        #   script: |
-        #     const comment = '## Documentation preview\n' +
-        #       '<' + process.env.URL + process.env.HTML_DIR + '>'
-        #     console.log(comment)
-        #     github.rest.issues.createComment({
-        #       issue_number: context.issue.number,
-        #       owner: context.repo.owner,
-        #       repo: context.repo.repo,
-        #       body: comment
-        #     })
           
   remove-html:
     runs-on: ubuntu-latest
