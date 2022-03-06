@@ -45,6 +45,16 @@
 </ul>
 <p>The workflow only runs on pull requests that are based from the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch.</p>
 </div>
+<div class="section" id="security-considerations">
+<h2>Security considerations<a class="headerlink" href="#security-considerations" title="Permalink to this headline">¶</a></h2>
+<p>The initial attempt worked for pushes and PRs by someone with access to push to the repo.
+For public repositories, it is important to have the documentation workflow operate for forks.</p>
+<p>The complicating factor is that it is very helpful to add a comment to the PR with the URL
+of the documentation preview.
+However, adding a comment to a PR is a privileged operation that requires <code class="docutils literal notranslate"><span class="pre">write</span></code> permission to the <code class="docutils literal notranslate"><span class="pre">issue</span></code> type.
+The suggested method for limiting the risk is covered in the following blog post:</p>
+<p><a class="reference external" href="https://securitylab.github.com/research/github-actions-preventing-pwn-requests/">https://securitylab.github.com/research/github-actions-preventing-pwn-requests/</a></p>
+</div>
 <div class="section" id="some-things-i-learned">
 <h2>Some things I learned<a class="headerlink" href="#some-things-i-learned" title="Permalink to this headline">¶</a></h2>
 <p>I cannot explain why, but the <cite>synchronize</cite> state for a <cite>pull_request</cite> is reported
@@ -61,6 +71,33 @@ in my logic:</p>
 </div>
 <p>Silly me.  The <cite>action</cite> field is not a child of the <cite>pull_request</cite>.
 It is a child of <cite>github.event</cite>.</p>
+</div>
+<div class="section" id="one-mystery">
+<h2>One mystery<a class="headerlink" href="#one-mystery" title="Permalink to this headline">¶</a></h2>
+<p>I’m unsure why the process in the <code class="docutils literal notranslate"><span class="pre">store-html</span></code> job somehow
+seems to have missing commits.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> Changes to be committed:
+   (use &quot;git restore --staged &lt;file&gt;...&quot; to unstage)
+         modified:   main/_sources/index.rst.txt
+         modified:   main/index.html
+         modified:   main/searchindex.js
+
+[gh-pages 3daa0dd] Adding HTML directory.
+ 3 files changed, 25 insertions(+), 1 deletion(-)
+ rewrite main/searchindex.js (64%)
+To https://github.com/mikemckiernan/sphinx-play
+ ! [rejected]        gh-pages -&gt; gh-pages (fetch first)
+error: failed to push some refs to &#39;https://github.com/mikemckiernan/sphinx-play&#39;
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., &#39;git pull ...&#39;) before pushing again.
+hint: See the &#39;Note about fast-forwards&#39; in &#39;git push --help&#39; for details.
+Error: Process completed with exit code 1.
+</pre></div>
+</div>
+<p>There’s something that I need to learn about Git.
+I have a misconception that a checkout would get the latest work.</p>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
