@@ -102,10 +102,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          comment=$(echo -e "## Documentation preview\n")
-          comment+=$(echo "<${{ env.URL }}${{ env.HTML_DIR }}>")
-          echo "${comment}"
-          gh pr comment ${{ env.PR_NO }} --body "${comment}"
+          echo -e "## Documentation preview" > body
+          echo -e "" >> body
+          echo -e "<${{ env.URL }}${{ env.HTML_DIR }}>" >> body
+          cat body
+          gh pr comment ${{ env.PR_NO }} --body-file body
         # uses: actions/github-script@v5
         # with:
         #   script: |
