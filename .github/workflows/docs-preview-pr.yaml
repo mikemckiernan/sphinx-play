@@ -4,20 +4,137 @@ on:
   workflow_run:
     workflows: [build]
     types: [completed]
+    branches: [main]
+
+env:
+  WF_ID: ${{ github.event.workflow_run.id }}
 
 jobs:
 
-  # Check that the target repository of the PR is configured for GitHub Pages.
-  echo-job:
+  # Always determine if GitHub Pages are configured for this repo.
+  get-gh-pages-url:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    # if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    outputs:
+      url: ${{ steps.api-resp.outputs.html_url }}
+      branch: ${{ steps.api-resp.outputs.branch }}
     steps:
-      - name: Echo event
+      - name: Check for GitHub Pages
+        id: api-resp
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const pages_url = [process.env.GITHUB_API_URL, "repos", process.env.GITHUB_REPOSITORY, "pages"].join("/")
+            console.log("Request to GitHub API for GitHub Pages URL: " + pages_url)
+            try {
+              const resp = await github.request(pages_url)
+              if (resp.status == "200") {
+                console.log("GitHub Pages are configured and available at: " + resp.data.html_url)
+                console.log("  ..and deployed from branch: " + resp.data.source.branch)
+                core.setOutput('html_url', resp.data.html_url)
+                core.setOutput('branch', resp.data.source.branch)
+                return
+              }
+              console.log(resp)
+            } catch (err) {
+              console.log("Request to GitHub API for Pages failed with message: " + err)
+            }
+            core.setOutput('html_url', '')
+            core.setOutput('branch', '')``
+
+  # Identify the dir for the HTML.
+  store-html:
+    runs-on: ubuntu-latest
+    needs: [get-gh-pages-url]
+    if: needs.get-gh-pages-url.outputs.url != ''
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ needs.get-gh-pages-url.outputs.branch }}
+      - name: Download artifacts
         env:
-          WF_ID: ${{ github.event.workflow_run.id }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh run view "${WF_ID}"
           gh run download "${WF_ID}"
-          cat ./pr/pr.txt
+          PR=$(cat ./pr/pr.txt)
+          MERGED=$(cat ./pr/merged.txt)
+          echo "PR_NO=${PR}" >> $GITHUB_ENV
+          echo "MERGE_STATUS=${MERGED}" >> $GITHUB_ENV
+          echo "PR_NO: ${{ env.PR_NO }}"
+          echo "MERGE_STATUS: ${{ env.MERGE_STATUS }}"
+
           ls -asl ./html-build-artifact/
+        
+      # If this is a push event to main, such as a merge from a PR...
+      - name: Set HTML dir for merges to main
+        if: env.MERGE_STATUS == 'true'
+        run: |
+          echo "HTML_DIR=main" >> $GITHUB_ENV
+      # If this is a PR...
+      - name: Set HTML dir for PRs
+        if: env.MERGE_STATUS == 'false'
+        run: |
+          echo "HTML_DIR=review/pr-${{ env.PR_NO }}" >> $GITHUB_ENV
+          echo "Setting HTML dir for PR to: " ${{ env.HTML_DIR }}
+      - name: Move HTML files from the download to pages directory
+        run: |
+          rm -rf "${{ env.HTML_DIR }}"
+          mv ./html-build-artifact/ "${{ env.HTML_DIR }}"
+          ls -asl "${{ env.HTML_DIR }}"
+      - name: Deploy HTML
+        run: |
+          git config user.name docs-preview
+          git config user.email do-not-send-@github.com
+          git add "${{ env.HTML_DIR }}"
+          git commit -m 'Adding HTML directory.' || (echo "Nothing changed." && exit 0)
+          git push
+      - name: Add HTML review URL comment to PR
+        if: env.MERGE_STATUS == 'false'
+        env:
+          URL: ${{ needs.get-gh-pages-url.outputs.url }}
+        run: |
+          comment='## Documentation preview\n'
+          comment+='<${URL}${{ env.HTML_DIR }}>'
+          echo "${comment}"
+          gh pr comment ${{ env.PR_NO }} --body "${comment}"
+        # uses: actions/github-script@v5
+        # with:
+        #   script: |
+        #     const comment = '## Documentation preview\n' +
+        #       '<' + process.env.URL + process.env.HTML_DIR + '>'
+        #     console.log(comment)
+        #     github.rest.issues.createComment({
+        #       issue_number: context.issue.number,
+        #       owner: context.repo.owner,
+        #       repo: context.repo.repo,
+        #       body: comment
+        #     })
+          
+  remove-html:
+    runs-on: ubuntu-latest
+    needs: [get-gh-pages-url]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ needs.get-gh-pages-url.outputs.branch }}
+      - name: Download PR artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run view "${WF_ID}"
+          gh run download "${WF_ID}" -n pr
+          PR=$(cat ./pr/pr.txt)
+          MERGED=$(cat ./pr/merged.txt)
+          echo "PR_NO=${PR}" >> $GITHUB_ENV
+          echo "MERGE_STATUS=${MERGED}" >> $GITHUB_ENV
+          echo "PR_NO: ${{ env.PR_NO }}"
+          echo "MERGE_STATUS: ${{ env.MERGE_STATUS }}"
+      - name: Delete and commit HTML review directory
+        if: env.MERGE_STATUS == 'true'
+        run: |
+          git config user.name docs-preview
+          git config user.email do-not-send-@github.com
+          git rm -r review/pr-${{ env.PR_NO }}
+          git commit -m 'Removing HTML review directory.'
+          git push
