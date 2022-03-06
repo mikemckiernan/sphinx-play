@@ -92,7 +92,7 @@ jobs:
           git add "${{ env.HTML_DIR }}"
           git status
           if git commit -m 'Adding HTML directory.'; then
-            git push
+            git push -f
           else 
            echo "Nothing changed."
           fi
