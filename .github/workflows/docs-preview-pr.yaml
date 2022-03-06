@@ -97,11 +97,7 @@ jobs:
            echo "Nothing changed."
           fi
       - name: Add HTML review URL comment to PR
-<<<<<<< HEAD
         if: env.MERGE_STATUS == 'false' && env.PR_ACTION == 'opened'
-=======
-        if: env.MERGE_STATUS == 'false' and env.PR_ACTION == 'opened'
->>>>>>> Only add PR comment on open
         env:
           URL: ${{ needs.get-gh-pages-url.outputs.url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
