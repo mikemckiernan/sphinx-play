@@ -13,5 +13,10 @@ jobs:
     # if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Echo event
+        env:
+          WF_ID: ${{ github.event.workflow_run.id }}
         run: |
-          echo '${{ toJSON(github.event.workflow_run) }}'
+          gh run view "${WF_ID}"
+          gh run download "${WF_ID}"
+          cat ./pr/pr.txt
+          ls -asl ./html-build-artifact/

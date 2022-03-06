@@ -35,3 +35,12 @@ jobs:
           path: docs/build/html
           if-no-files-found: error
           retention-days: 1
+      - name: Stash PR number
+        run: |
+          mkdir -p ./pr
+          echo ${{ github.event.number }} > ./pr/pr.txt
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pr
+          path: pr/
+
