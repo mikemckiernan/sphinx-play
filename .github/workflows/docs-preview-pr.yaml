@@ -93,6 +93,7 @@ jobs:
         if: env.MERGE_STATUS == 'false'
         env:
           URL: ${{ needs.get-gh-pages-url.outputs.url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           comment='## Documentation preview\n'
           comment+='<${URL}${{ env.HTML_DIR }}>'
