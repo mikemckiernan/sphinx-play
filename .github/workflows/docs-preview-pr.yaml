@@ -8,11 +8,11 @@ on:
 jobs:
 
   # Check that the target repository of the PR is configured for GitHub Pages.
-  echo:
+  echo-job:
     runs-on: ubuntu-latest
     steps:
       - name: Echo context
+        env:
+          GH: ${{ github.event.workflow_run }}
         run: |
           echo "${GH}"
-        env:
-          GH: ${{ github.event }}
