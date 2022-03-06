@@ -1,0 +1,37 @@
+name: build
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+    branches: [main]
+
+jobs:
+
+  python-build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.9.7]
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install Sphinx==3.5.4
+      - name: Make HTML
+        run: |
+          pushd docs
+          make html
+          popd
+      - name: Directory listing
+        run: ls -asl docs/build/html
+      - uses: actions/upload-artifact@v2
+        with:
+          name: html-build-artifact
+          path: docs/build/html
+          if-no-files-found: error
+          retention-days: 1

@@ -1,0 +1,20 @@
+name: docs-preview-pr
+
+on:
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+
+jobs:
+
+  # Check that the target repository of the PR is configured for GitHub Pages.
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo context
+        run: |
+          echo "${DATA}"
+          echo "${GH}"
+        env:
+          DATA: ${{ context }}
+          GH: ${{ github.event }}
