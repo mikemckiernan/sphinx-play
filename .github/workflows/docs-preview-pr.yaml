@@ -13,8 +13,6 @@ jobs:
     steps:
       - name: Echo context
         run: |
-          echo "${DATA}"
           echo "${GH}"
         env:
-          DATA: ${{ context }}
           GH: ${{ github.event }}
