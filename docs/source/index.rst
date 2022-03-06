@@ -67,6 +67,26 @@ It is a child of `github.event`.
 One mystery
 -----------
 
+I have an update on the mystery.
+I'm fairly sure it was triggered by a race due to having the
+``store-html`` job and ``remove-html`` job run simultaneously.
+Both jobs checked out the GitHub Pages branch.
+On a merge, the ``store-html`` job added HTML to the ``main`` directory and pushed.
+At approximately the same time, the ``remove-html`` job removed the review directory and pushed.
+
+I believe the fix is to consolodate the two jobs into a single job that handles all the permutations.
+
+PR is merged
+  Replace the ``main`` directory with the HTML artifact and remove the review HTML directory.
+
+PR is closed but not merged
+  Remove the review HTML directory.
+
+PR is updated
+  Replace the HTML review directory with the HTML artifact.
+
+...Original demonstration of ignorance follows...
+
 I'm unsure why the process in the ``store-html`` job somehow
 seems to have missing commits.
 
