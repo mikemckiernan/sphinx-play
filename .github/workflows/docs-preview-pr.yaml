@@ -61,17 +61,17 @@ jobs:
           MERGED=$(cat ./pr/merged.txt)
           echo "PR_NO=${PR}" >> $GITHUB_ENV
           echo "MERGE_STATUS=${MERGED}" >> $GITHUB_ENV
-          echo "PR_NO: ${{ env.PR_NO }}"
-          echo "MERGE_STATUS: ${{ env.MERGE_STATUS }}"
 
-          ls -asl ./html-build-artifact/
-        
-      # If this is a push event to main, such as a merge from a PR...
+          ls -asl
+
+          ls -asl review
+
+      # If this is a push event to main, such as a merge from a PR, store in directory main.
       - name: Set HTML dir for merges to main
         if: env.MERGE_STATUS == 'true'
         run: |
           echo "HTML_DIR=main" >> $GITHUB_ENV
-      # If this is a PR...
+      # If this is a PR, store in a directory with pattern review/pr-${PR_NO}.
       - name: Set HTML dir for PRs
         if: env.MERGE_STATUS == 'false'
         run: |
@@ -79,6 +79,7 @@ jobs:
           echo "Setting HTML dir for PR to: " ${{ env.HTML_DIR }}
       - name: Move HTML files from the download to pages directory
         run: |
+          mkdir review || true 
           rm -rf "${{ env.HTML_DIR }}"
           mv ./html-build-artifact/ "${{ env.HTML_DIR }}"
           ls -asl "${{ env.HTML_DIR }}"
@@ -87,6 +88,7 @@ jobs:
           git config user.name docs-preview
           git config user.email do-not-send-@github.com
           git add "${{ env.HTML_DIR }}"
+          git status
           git commit -m 'Adding HTML directory.' || (echo "Nothing changed." && exit 0)
           git push
       - name: Add HTML review URL comment to PR
@@ -95,8 +97,8 @@ jobs:
           URL: ${{ needs.get-gh-pages-url.outputs.url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          comment='## Documentation preview\n'
-          comment+='<${URL}${{ env.HTML_DIR }}>'
+          comment=$(echo '## Documentation preview')
+          comment+=$(echo '<${URL}${{ env.HTML_DIR }}>')
           echo "${comment}"
           gh pr comment ${{ env.PR_NO }} --body "${comment}"
         # uses: actions/github-script@v5
@@ -124,13 +126,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh run view "${WF_ID}"
-          gh run download "${WF_ID}" -n pr
+          gh run download "${WF_ID}" -n pr -D pr
           PR=$(cat ./pr/pr.txt)
           MERGED=$(cat ./pr/merged.txt)
           echo "PR_NO=${PR}" >> $GITHUB_ENV
           echo "MERGE_STATUS=${MERGED}" >> $GITHUB_ENV
-          echo "PR_NO: ${{ env.PR_NO }}"
-          echo "MERGE_STATUS: ${{ env.MERGE_STATUS }}"
       - name: Delete and commit HTML review directory
         if: env.MERGE_STATUS == 'true'
         run: |
