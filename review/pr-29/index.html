@@ -45,6 +45,16 @@
 </ul>
 <p>The workflow only runs on pull requests that are based from the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch.</p>
 </div>
+<div class="section" id="security-considerations">
+<h2>Security considerations<a class="headerlink" href="#security-considerations" title="Permalink to this headline">¶</a></h2>
+<p>The initial attempt worked for pushes and PRs by someone with access to push to the repo.
+For public repositories, it is important to have the documentation workflow operate for forks.</p>
+<p>The complicating factor is that it is very helpful to add a comment to the PR with the URL
+of the documentation preview.
+However, adding a comment to a PR is a privileged operation that requires <code class="docutils literal notranslate"><span class="pre">write</span></code> permission to the <code class="docutils literal notranslate"><span class="pre">issue</span></code> type.
+The suggested method for limiting the risk is covered in the following blog post:</p>
+<p><a class="reference external" href="https://securitylab.github.com/research/github-actions-preventing-pwn-requests/">https://securitylab.github.com/research/github-actions-preventing-pwn-requests/</a></p>
+</div>
 <div class="section" id="some-things-i-learned">
 <h2>Some things I learned<a class="headerlink" href="#some-things-i-learned" title="Permalink to this headline">¶</a></h2>
 <p>I cannot explain why, but the <cite>synchronize</cite> state for a <cite>pull_request</cite> is reported
