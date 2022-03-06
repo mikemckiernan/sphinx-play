@@ -94,7 +94,11 @@ jobs:
           git commit -m 'Adding HTML directory.' || (echo "Nothing changed." && exit 0)
           git push
       - name: Add HTML review URL comment to PR
+<<<<<<< HEAD
         if: env.MERGE_STATUS == 'false' && env.PR_ACTION == 'opened'
+=======
+        if: env.MERGE_STATUS == 'false' and env.PR_ACTION == 'opened'
+>>>>>>> Only add PR comment on open
         env:
           URL: ${{ needs.get-gh-pages-url.outputs.url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
