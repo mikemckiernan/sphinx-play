@@ -110,9 +110,11 @@ Use of secrets.GITHUB_TOKEN
 
 I felt that it was worthwhile to use the ``gh`` CLI whenever possible just to reduce complexity.
 
-I referred to the following documentation from GitHub.
+I referred to the following documentation from GitHub:
 
-https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
+- https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
+
+- https://github.blog/2021-03-11-scripting-with-github-cli/
 
 The GitHub documentation routinely shows the following pattern:
 
@@ -147,4 +149,3 @@ the following actions:
   is closed.
 
 - If the pull request is closed, delete the review directory.
-  
