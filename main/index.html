@@ -74,6 +74,22 @@ It is a child of <cite>github.event</cite>.</p>
 </div>
 <div class="section" id="one-mystery">
 <h2>One mystery<a class="headerlink" href="#one-mystery" title="Permalink to this headline">¶</a></h2>
+<p>I have an update on the mystery.
+I’m fairly sure it was triggered by a race due to having the
+<code class="docutils literal notranslate"><span class="pre">store-html</span></code> job and <code class="docutils literal notranslate"><span class="pre">remove-html</span></code> job run simultaneously.
+Both jobs checked out the GitHub Pages branch.
+On a merge, the <code class="docutils literal notranslate"><span class="pre">store-html</span></code> job added HTML to the <code class="docutils literal notranslate"><span class="pre">main</span></code> directory and pushed.
+At approximately the same time, the <code class="docutils literal notranslate"><span class="pre">remove-html</span></code> job removed the review directory and pushed.</p>
+<p>I believe the fix is to consolodate the two jobs into a single job that handles all the permutations.</p>
+<dl class="simple">
+<dt>PR is merged</dt><dd><p>Replace the <code class="docutils literal notranslate"><span class="pre">main</span></code> directory with the HTML artifact and remove the review HTML directory.</p>
+</dd>
+<dt>PR is closed but not merged</dt><dd><p>Remove the review HTML directory.</p>
+</dd>
+<dt>PR is updated</dt><dd><p>Replace the HTML review directory with the HTML artifact.</p>
+</dd>
+</dl>
+<p>…Original demonstration of ignorance follows…</p>
 <p>I’m unsure why the process in the <code class="docutils literal notranslate"><span class="pre">store-html</span></code> job somehow
 seems to have missing commits.</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> Changes to be committed:
