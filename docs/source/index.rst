@@ -1,123 +1,150 @@
-.. sphinx-play documentation master file, created by
-   sphinx-quickstart on Tue Mar  1 16:25:36 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to sphinx-play's documentation!
-=======================================
+Proposed automation for documentation
+=====================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-GitHub workflows for documentation
-----------------------------------
+Goals
+-----
 
-The goal is to add some automation to GitHub projects for documentation.
+The goal is to add some automation for documentation to GitHub projects.
 
-- [ ] When I open a PR, build the documentation, add it to GitHub Pages, and update the PR with a comment that includes a review URL.
+- When I open a PR, perform the following steps:
 
-- [ ] When I push updates to a PR, rebuild the documentation.
+  - Build the HTML documentation as part of the Python build and test workflow.
 
-- [ ] When I close a PR, remove the review HTML from GitHub Pages.
+  - Create a review directory for the PR in GitHub Pages.
 
-- [ ] When I merge a PR, rebuild the documentation, and update the ``main`` directory for GitHub Pages.
+  - Add the HTML to the review directory.
 
-The workflow only runs on pull requests that are based from the ``main`` branch.
+  - Update the PR with a comment that includes a review URL.
+
+- When I push updates to a PR, rebuild the documentation and update the review directory in GitHub Pages.
+
+- When I close a PR, remove the review directory from GitHub Pages.
+
+- When I merge a PR, rebuild the documentation, and update the ``main`` directory for GitHub Pages.
+
+Run the workflow for pull requests that are based from the ``main`` branch only.
+
+
+Anticipated implementation
+--------------------------
+
+#. Update the workflow that builds the Python project and add a few steps:
+
+   - Build the documentation.
+
+   - Store the result of the documentation build  and pull request information
+     with ``actions/upload-artifact``.
+
+   .. code-block:: yaml
+
+      - name: Make HTML
+        run: |
+          pushd docs
+          make html
+          popd
+      - name: Upload HTML
+        uses: actions/upload-artifact@v2
+        with:
+          name: html-build-artifact
+          path: docs/build/html
+          if-no-files-found: error
+          retention-days: 1
+      - name: Store PR information
+        run: |
+          mkdir ./pr
+          echo ${{ github.event.number }}              > ./pr/pr.txt
+          echo ${{ github.event.pull_request.merged }} > ./pr/merged.txt
+          echo ${{ github.event.action }}              > ./pr/action.txt
+      - name: Upload PR information
+        uses: actions/upload-artifact@v2
+        with:
+          name: pr
+          path: pr/
+
+    A workflow that triggers on a pull request does not have access to the
+    data about the pull request, so the pull request information is stored
+    as an artifact to pass the data to the second workflow.
+
+    Storing the pull request information as an artifact has a kludgy feel, but
+    seems to be a standard practice. The following two URLs show nearly identical
+    content.
+
+    - https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#using-data-from-the-triggering-workflow
+
+    - https://securitylab.github.com/research/github-actions-preventing-pwn-requests
+
+#. Add a workflow that is triggered by the build workflow.
+   This second workflow downloads the artifacts and updates GitHub Pages.
+
+   It's kind of dull reading, so peek in ``.github/workflows/docs-preview-pr.yaml``.
 
 
 Security considerations
 -----------------------
 
-The initial attempt worked for pushes and PRs by someone with access to push to the repo.
-For public repositories, it is important to have the documentation workflow operate for forks.
+Because the team uses public repositories, it is important to have the documentation workflow operate for forks.
 
-The complicating factor is that it is very helpful to add a comment to the PR with the URL
-of the documentation preview.
-However, adding a comment to a PR is a privileged operation that requires ``write`` permission to the ``issue`` type.
-The suggested method for limiting the risk is covered in the following blog post:
+Working with forks is a complicating factor for the two goals of adding a comment to the pull request and
+adding HTML to the branch that is used for GitHub Pages.
+
+The following page shows that a forked repository has ``read`` access from the ``GITHUB_TOKEN`` on all
+scopes, specifically for ``issues`` and ``pages``:
+
+https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+
+The proposed method for providing automation for pull requests and limiting risk is shown in the
+following blog:
 
 https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
 
 
-Some things I learned
----------------------
+Questions and next steps
+------------------------
 
-I cannot explain why, but the `synchronize` state for a `pull_request` is reported
-in the GitHub UI, but it is not reported in the events that can be downloaded with `curl`:
+Use of secrets.GITHUB_TOKEN
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: shell
+I felt that it was worthwhile to use the ``gh`` CLI whenever possible just to reduce complexity.
 
-   curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/mikemckiernan/sphinx-play/events
+I referred to the following documentation from GitHub.
 
-Pushes to a branch that has an open PR seem to run the actions again.
-In the case of this workflow, the HTML is build again and deployed.
+https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
 
-Regarding the comment with the URL to the proposed changes, I had a boo-boo
-in my logic:
+The GitHub documentation routinely shows the following pattern:
 
 .. code-block:: yaml
+   - run: gh ...some-command...
+     env:
+       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-   if: github.event.pull_request.action == 'opened'
-
-Silly me.  The `action` field is not a child of the `pull_request`.
-It is a child of `github.event`.
-
-
-One mystery
------------
-
-I have an update on the mystery.
-I'm fairly sure it was triggered by a race due to having the
-``store-html`` job and ``remove-html`` job run simultaneously.
-Both jobs checked out the GitHub Pages branch.
-On a merge, the ``store-html`` job added HTML to the ``main`` directory and pushed.
-At approximately the same time, the ``remove-html`` job removed the review directory and pushed.
-
-I believe the fix is to consolodate the two jobs into a single job that handles all the permutations.
-
-PR is merged
-  Replace the ``main`` directory with the HTML artifact and remove the review HTML directory.
-
-PR is closed but not merged
-  Remove the review HTML directory.
-
-PR is updated
-  Replace the HTML review directory with the HTML artifact.
-
-...Original demonstration of ignorance follows...
-
-I'm unsure why the process in the ``store-html`` job somehow
-seems to have missing commits.
-
-.. code-block:: text
-
-   Changes to be committed:
-     (use "git restore --staged <file>..." to unstage)
-           modified:   main/_sources/index.rst.txt
-           modified:   main/index.html
-           modified:   main/searchindex.js
-
-  [gh-pages 3daa0dd] Adding HTML directory.
-   3 files changed, 25 insertions(+), 1 deletion(-)
-   rewrite main/searchindex.js (64%)
-  To https://github.com/mikemckiernan/sphinx-play
-   ! [rejected]        gh-pages -> gh-pages (fetch first)
-  error: failed to push some refs to 'https://github.com/mikemckiernan/sphinx-play'
-  hint: Updates were rejected because the remote contains work that you do
-  hint: not have locally. This is usually caused by another repository pushing
-  hint: to the same ref. You may want to first integrate the remote changes
-  hint: (e.g., 'git pull ...') before pushing again.
-  hint: See the 'Note about fast-forwards' in 'git push --help' for details.
-  Error: Process completed with exit code 1.
-
-There's something that I need to learn about Git.
-I have a misconception that a checkout would get the latest work.
+I need to know if that is a deal breaker.
 
 
-Indices and tables
-==================
+Preserve the review HTML for a little longer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+My inclination is to revise the workflow so that it does not delete the
+``review/pr-PR_NO`` directory immediately when a pull request is closed.
+
+I think there is value to leaving the review HTML for a week after a
+pull request is closed.
+It provides a quick way to stare-and-compare between what a pull request
+submitted and the HTML for the ``main`` branch.
+
+My proposal is to add a second workflow on a daily schedule that performs
+the following actions:
+
+- Check out the branch that is used for GitHub Pages.
+
+- Find the directories that are older than a week.
+
+- Use the pull request number from the directory name to
+  query the GitHub API to determine if the related pull request
+  is closed.
+
+- If the pull request is closed, delete the review directory.
+  
