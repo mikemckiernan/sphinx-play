@@ -29,10 +29,18 @@ The goal is to add some automation for documentation to GitHub projects.
 Run the workflow for pull requests that are based from the ``main`` branch only.
 
 
+Prerequisites
+-------------
+
+* Enable GitHub Pages, typically on the ``gh-pages`` branch.
+
+* Add a ``.nojekyll`` file to the root directory on the GitHub Pages branch.
+
+
 Anticipated implementation
 --------------------------
 
-#. Update the workflow that builds the Python project and add a few steps:
+1. Update the workflow that builds the Python project and add a few steps:
 
    - Build the documentation.
 
@@ -65,22 +73,30 @@ Anticipated implementation
           name: pr
           path: pr/
 
-    A workflow that triggers on a pull request does not have access to the
-    data about the pull request, so the pull request information is stored
-    as an artifact to pass the data to the second workflow.
+  A workflow that triggers on a pull request does not have access to the
+  data about the pull request, so the pull request information is stored
+  as an artifact to pass the data to the second workflow.
 
-    Storing the pull request information as an artifact has a kludgy feel, but
-    seems to be a standard practice. The following two URLs show nearly identical
-    content.
+  Storing the pull request information as an artifact has a kludgy feel, but
+  seems to be a standard practice. The following two URLs show nearly identical
+  content.
 
-    - https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#using-data-from-the-triggering-workflow
+  - https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#using-data-from-the-triggering-workflow
 
-    - https://securitylab.github.com/research/github-actions-preventing-pwn-requests
+  - https://securitylab.github.com/research/github-actions-preventing-pwn-requests
 
-#. Add a workflow that is triggered by the build workflow.
+2. Add a workflow that is triggered by the build workflow.
    This second workflow downloads the artifacts and updates GitHub Pages.
 
    It's kind of dull reading, so peek in ``.github/workflows/docs-preview-pr.yaml``.
+
+   .. note::
+
+      As of 08MAR, it seems that the workflow files must be pushed to the ``main``
+      branch of the repo.
+      Two attempts were made to add the workflow files on a pull request.
+      On both attempts, the workflow files did not run--that makes some sense
+      from the perspective of not running untrusted code.
 
 
 Security considerations
@@ -92,14 +108,14 @@ Working with forks is a complicating factor for the two goals of adding a commen
 adding HTML to the branch that is used for GitHub Pages.
 
 The following page shows that a forked repository has ``read`` access from the ``GITHUB_TOKEN`` on all
-scopes, specifically for ``issues`` and ``pages``:
+scopes and specifically for the ``issues`` and ``pages`` scopes:
 
-https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+  https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
 
 The proposed method for providing automation for pull requests and limiting risk is shown in the
 following blog:
 
-https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+  https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
 
 
 Questions and next steps
@@ -119,11 +135,12 @@ I referred to the following documentation from GitHub:
 The GitHub documentation routinely shows the following pattern:
 
 .. code-block:: yaml
+
    - run: gh ...some-command...
      env:
        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-I need to know if that is a deal breaker.
+I need to know if using ``${{ secrets.GITHUB_TOKEN }}`` is a deal breaker.
 
 
 Preserve the review HTML for a little longer
