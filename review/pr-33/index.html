@@ -61,44 +61,46 @@
 <li><p>Store the result of the documentation build  and pull request information
 with <code class="docutils literal notranslate"><span class="pre">actions/upload-artifact</span></code>.</p></li>
 </ul>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Make HTML</span><span class="w"></span>
-<span class="w">    </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
-<span class="w">      </span><span class="no">pushd docs</span><span class="w"></span>
-<span class="w">      </span><span class="no">make html</span><span class="w"></span>
-<span class="w">      </span><span class="no">popd</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload HTML</span><span class="w"></span>
-<span class="w">    </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v2</span><span class="w"></span>
-<span class="w">    </span><span class="nt">with</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">html-build-artifact</span><span class="w"></span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docs/build/html</span><span class="w"></span>
-<span class="w">      </span><span class="nt">if-no-files-found</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error</span><span class="w"></span>
-<span class="w">      </span><span class="nt">retention-days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Store PR information</span><span class="w"></span>
-<span class="w">    </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
-<span class="w">      </span><span class="no">mkdir ./pr</span><span class="w"></span>
-<span class="w">      </span><span class="no">echo ${{ github.event.number }}              &gt; ./pr/pr.txt</span><span class="w"></span>
-<span class="w">      </span><span class="no">echo ${{ github.event.pull_request.merged }} &gt; ./pr/merged.txt</span><span class="w"></span>
-<span class="w">      </span><span class="no">echo ${{ github.event.action }}              &gt; ./pr/action.txt</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload PR information</span><span class="w"></span>
-<span class="w">    </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v2</span><span class="w"></span>
-<span class="w">    </span><span class="nt">with</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pr</span><span class="w"></span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pr/</span><span class="w"></span>
-
-<span class="l l-Scalar l-Scalar-Plain">A workflow that triggers on a pull request does not have access to the</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">data about the pull request, so the pull request information is stored</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">as an artifact to pass the data to the second workflow.</span><span class="w"></span>
-
-<span class="l l-Scalar l-Scalar-Plain">Storing the pull request information as an artifact has a kludgy feel, but</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">seems to be a standard practice. The following two URLs show nearly identical</span><span class="w"></span>
-<span class="l l-Scalar l-Scalar-Plain">content.</span><span class="w"></span>
-
-<span class="l l-Scalar l-Scalar-Plain">- https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#using-data-from-the-triggering-workflow</span><span class="w"></span>
-
-<span class="l l-Scalar l-Scalar-Plain">- https://securitylab.github.com/research/github-actions-preventing-pwn-requests</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Make HTML</span><span class="w"></span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
+<span class="w">    </span><span class="no">pushd docs</span><span class="w"></span>
+<span class="w">    </span><span class="no">make html</span><span class="w"></span>
+<span class="w">    </span><span class="no">popd</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload HTML</span><span class="w"></span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v2</span><span class="w"></span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">html-build-artifact</span><span class="w"></span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docs/build/html</span><span class="w"></span>
+<span class="w">    </span><span class="nt">if-no-files-found</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error</span><span class="w"></span>
+<span class="w">    </span><span class="nt">retention-days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Store PR information</span><span class="w"></span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
+<span class="w">    </span><span class="no">mkdir ./pr</span><span class="w"></span>
+<span class="w">    </span><span class="no">echo ${{ github.event.number }}              &gt; ./pr/pr.txt</span><span class="w"></span>
+<span class="w">    </span><span class="no">echo ${{ github.event.pull_request.merged }} &gt; ./pr/merged.txt</span><span class="w"></span>
+<span class="w">    </span><span class="no">echo ${{ github.event.action }}              &gt; ./pr/action.txt</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload PR information</span><span class="w"></span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v2</span><span class="w"></span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pr</span><span class="w"></span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pr/</span><span class="w"></span>
 </pre></div>
 </div>
 </li>
+</ol>
+<blockquote>
+<div><p>A workflow that triggers on a pull request does not have access to the
+data about the pull request, so the pull request information is stored
+as an artifact to pass the data to the second workflow.</p>
+<p>Storing the pull request information as an artifact has a kludgy feel, but
+seems to be a standard practice. The following two URLs show nearly identical
+content.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#using-data-from-the-triggering-workflow">https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#using-data-from-the-triggering-workflow</a></p></li>
+<li><p><a class="reference external" href="https://securitylab.github.com/research/github-actions-preventing-pwn-requests">https://securitylab.github.com/research/github-actions-preventing-pwn-requests</a></p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic" start="2">
 <li><p>Add a workflow that is triggered by the build workflow.
 This second workflow downloads the artifacts and updates GitHub Pages.</p>
 <p>It’s kind of dull reading, so peek in <code class="docutils literal notranslate"><span class="pre">.github/workflows/docs-preview-pr.yaml</span></code>.</p>
@@ -111,11 +113,15 @@ This second workflow downloads the artifacts and updates GitHub Pages.</p>
 <p>Working with forks is a complicating factor for the two goals of adding a comment to the pull request and
 adding HTML to the branch that is used for GitHub Pages.</p>
 <p>The following page shows that a forked repository has <code class="docutils literal notranslate"><span class="pre">read</span></code> access from the <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code> on all
-scopes, specifically for <code class="docutils literal notranslate"><span class="pre">issues</span></code> and <code class="docutils literal notranslate"><span class="pre">pages</span></code>:</p>
-<p><a class="reference external" href="https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token">https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token</a></p>
+scopes and specifically for the <code class="docutils literal notranslate"><span class="pre">issues</span></code> and <code class="docutils literal notranslate"><span class="pre">pages</span></code> scopes:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token">https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token</a></p>
+</div></blockquote>
 <p>The proposed method for providing automation for pull requests and limiting risk is shown in the
 following blog:</p>
-<p><a class="reference external" href="https://securitylab.github.com/research/github-actions-preventing-pwn-requests/">https://securitylab.github.com/research/github-actions-preventing-pwn-requests/</a></p>
+<blockquote>
+<div><p><a class="reference external" href="https://securitylab.github.com/research/github-actions-preventing-pwn-requests/">https://securitylab.github.com/research/github-actions-preventing-pwn-requests/</a></p>
+</div></blockquote>
 </div>
 <div class="section" id="questions-and-next-steps">
 <h2>Questions and next steps<a class="headerlink" href="#questions-and-next-steps" title="Permalink to this headline">¶</a></h2>
@@ -128,7 +134,12 @@ following blog:</p>
 <li><p><a class="reference external" href="https://github.blog/2021-03-11-scripting-with-github-cli/">https://github.blog/2021-03-11-scripting-with-github-cli/</a></p></li>
 </ul>
 <p>The GitHub documentation routinely shows the following pattern:</p>
-<p>I need to know if that is a deal breaker.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gh ...some-command...</span><span class="w"></span>
+<span class="w">  </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">GITHUB_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.GITHUB_TOKEN }}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>I need to know if using <code class="docutils literal notranslate"><span class="pre">${{</span> <span class="pre">secrets.GITHUB_TOKEN</span> <span class="pre">}}</span></code> is a deal breaker.</p>
 </div>
 <div class="section" id="preserve-the-review-html-for-a-little-longer">
 <h3>Preserve the review HTML for a little longer<a class="headerlink" href="#preserve-the-review-html-for-a-little-longer" title="Permalink to this headline">¶</a></h3>
