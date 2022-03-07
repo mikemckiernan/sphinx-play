@@ -4,7 +4,6 @@ on:
   workflow_run:
     workflows: [build]
     types: [completed]
-    #branches: [main]
 
 env:
   WF_ID: ${{ github.event.workflow_run.id }}
@@ -74,11 +73,11 @@ jobs:
           rm -rf ./pr
 
       # Permutations:
-      # - PR was merged, then PR_ACTION is closed, need to delete review directory.
-      # - PR was updated, PR_ACTION is !closed, need to delete review dir and update it.
-      # - PR was closed but not merged, PR_ACTION is closed and MERGE_STATUS is false, need to delete review dir.
+      # - PR was merged, update `main` directory; PR_ACTION is closed, need to delete review directory.
+      # - PR was updated, PR_ACTION is !closed, need to delete review directory and update it.
+      # - PR was closed (regardless of merge), PR_ACTION is closed, need to delete review directory.
 
-      # If the PR was merged, store in directory main.
+      # If the PR was merged, store in directory `main`. PR_ACTION is closed and handled two steps later.
       - name: Handle HTML for merges to main
         if: env.MERGE_STATUS == 'true'
         run: |
@@ -86,7 +85,7 @@ jobs:
           mv ./html-build-artifact/  main
           git add main
       # If this PR is still open, store HTML in a review directory.
-      - name: Handle HTML review dir for open PRs
+      - name: Handle HTML review directory for open PRs and updates to PRs
         if: env.MERGE_STATUS == 'false' && env.PR_ACTION != 'closed'
         run: |
           rm -rf "${{ env.REVIEW_DIR }}" 2>/dev/null || true
