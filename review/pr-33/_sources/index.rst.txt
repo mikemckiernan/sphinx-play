@@ -29,6 +29,14 @@ The goal is to add some automation for documentation to GitHub projects.
 Run the workflow for pull requests that are based from the ``main`` branch only.
 
 
+Prerequisites
+-------------
+
+* Enable GitHub Pages, typically on the ``gh-pages`` branch.
+
+* Add a ``.nojekyll`` file to the root directory on the GitHub Pages branch.
+
+
 Anticipated implementation
 --------------------------
 
@@ -81,6 +89,14 @@ Anticipated implementation
    This second workflow downloads the artifacts and updates GitHub Pages.
 
    It's kind of dull reading, so peek in ``.github/workflows/docs-preview-pr.yaml``.
+
+   .. note::
+
+      As of 08MAR, it seems that the workflow files must be pushed to the ``main``
+      branch of the repo.
+      Two attempts were made to add the workflow files on a pull request.
+      On both attempts, the workflow files did not run--that makes some sense
+      from the perspective of not running untrusted code.
 
 
 Security considerations
