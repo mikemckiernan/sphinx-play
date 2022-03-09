@@ -10,6 +10,8 @@ Welcome to sphinx-play's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   Writing a good README <good-readme.md>
+
 GitHub workflows for documentation
 ----------------------------------
 
