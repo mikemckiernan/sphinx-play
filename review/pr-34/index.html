@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to sphinx-play’s documentation! &#8212; sphinx-play v0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Project Title" href="good-readme.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-sphinx-play-s-documentation">
+<h1>Welcome to sphinx-play’s documentation!<a class="headerlink" href="#welcome-to-sphinx-play-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="good-readme.html">Writing a good README</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="good-readme.html#contents-optional">Contents (Optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="good-readme.html#installation-required">Installation (Required)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="good-readme.html#getting-started-first-steps-using-project-optional">Getting Started / First Steps / Using <em>project</em> (Optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="good-readme.html#notebook-examples-and-tutorials-optional">Notebook Examples and Tutorials (Optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="good-readme.html#feedback-and-support-required">Feedback and Support (Required)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="good-readme.html#license-optional">License (Optional)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="github-workflows-for-documentation">
+<h2>GitHub workflows for documentation<a class="headerlink" href="#github-workflows-for-documentation" title="Permalink to this headline">¶</a></h2>
+<p>The goal is to add some automation to GitHub projects for documentation.</p>
+<ul class="simple">
+<li><p>[ ] When I open a PR, build the documentation, add it to GitHub Pages, and update the PR with a comment that includes a review URL.</p></li>
+<li><p>[ ] When I push updates to a PR, rebuild the documentation.</p></li>
+<li><p>[ ] When I close a PR, remove the review HTML from GitHub Pages.</p></li>
+<li><p>[ ] When I merge a PR, rebuild the documentation, and update the <code class="docutils literal notranslate"><span class="pre">main</span></code> directory for GitHub Pages.</p></li>
+</ul>
+<p>The workflow only runs on pull requests that are based from the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch.</p>
+</div>
+<div class="section" id="security-considerations">
+<h2>Security considerations<a class="headerlink" href="#security-considerations" title="Permalink to this headline">¶</a></h2>
+<p>The initial attempt worked for pushes and PRs by someone with access to push to the repo.
+For public repositories, it is important to have the documentation workflow operate for forks.</p>
+<p>The complicating factor is that it is very helpful to add a comment to the PR with the URL
+of the documentation preview.
+However, adding a comment to a PR is a privileged operation that requires <code class="docutils literal notranslate"><span class="pre">write</span></code> permission to the <code class="docutils literal notranslate"><span class="pre">issue</span></code> type.
+The suggested method for limiting the risk is covered in the following blog post:</p>
+<p><a class="reference external" href="https://securitylab.github.com/research/github-actions-preventing-pwn-requests/">https://securitylab.github.com/research/github-actions-preventing-pwn-requests/</a></p>
+</div>
+<div class="section" id="some-things-i-learned">
+<h2>Some things I learned<a class="headerlink" href="#some-things-i-learned" title="Permalink to this headline">¶</a></h2>
+<p>I cannot explain why, but the <cite>synchronize</cite> state for a <cite>pull_request</cite> is reported
+in the GitHub UI, but it is not reported in the events that can be downloaded with <cite>curl</cite>:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -H <span class="s2">&quot;Accept: application/vnd.github.v3+json&quot;</span> https://api.github.com/repos/mikemckiernan/sphinx-play/events
+</pre></div>
+</div>
+<p>Pushes to a branch that has an open PR seem to run the actions again.
+In the case of this workflow, the HTML is build again and deployed.</p>
+<p>Regarding the comment with the URL to the proposed changes, I had a boo-boo
+in my logic:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github.event.pull_request.action == &#39;opened&#39;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Silly me.  The <cite>action</cite> field is not a child of the <cite>pull_request</cite>.
+It is a child of <cite>github.event</cite>.</p>
+</div>
+<div class="section" id="one-mystery">
+<h2>One mystery<a class="headerlink" href="#one-mystery" title="Permalink to this headline">¶</a></h2>
+<p>I have an update on the mystery.
+I’m fairly sure it was triggered by a race due to having the
+<code class="docutils literal notranslate"><span class="pre">store-html</span></code> job and <code class="docutils literal notranslate"><span class="pre">remove-html</span></code> job run simultaneously.
+Both jobs checked out the GitHub Pages branch.
+On a merge, the <code class="docutils literal notranslate"><span class="pre">store-html</span></code> job added HTML to the <code class="docutils literal notranslate"><span class="pre">main</span></code> directory and pushed.
+At approximately the same time, the <code class="docutils literal notranslate"><span class="pre">remove-html</span></code> job removed the review directory and pushed.</p>
+<p>I believe the fix is to consolodate the two jobs into a single job that handles all the permutations.</p>
+<dl class="simple">
+<dt>PR is merged</dt><dd><p>Replace the <code class="docutils literal notranslate"><span class="pre">main</span></code> directory with the HTML artifact and remove the review HTML directory.</p>
+</dd>
+<dt>PR is closed but not merged</dt><dd><p>Remove the review HTML directory.</p>
+</dd>
+<dt>PR is updated</dt><dd><p>Replace the HTML review directory with the HTML artifact.</p>
+</dd>
+</dl>
+<p>…Original demonstration of ignorance follows…</p>
+<p>I’m unsure why the process in the <code class="docutils literal notranslate"><span class="pre">store-html</span></code> job somehow
+seems to have missing commits.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> Changes to be committed:
+   (use &quot;git restore --staged &lt;file&gt;...&quot; to unstage)
+         modified:   main/_sources/index.rst.txt
+         modified:   main/index.html
+         modified:   main/searchindex.js
+
+[gh-pages 3daa0dd] Adding HTML directory.
+ 3 files changed, 25 insertions(+), 1 deletion(-)
+ rewrite main/searchindex.js (64%)
+To https://github.com/mikemckiernan/sphinx-play
+ ! [rejected]        gh-pages -&gt; gh-pages (fetch first)
+error: failed to push some refs to &#39;https://github.com/mikemckiernan/sphinx-play&#39;
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., &#39;git pull ...&#39;) before pushing again.
+hint: See the &#39;Note about fast-forwards&#39; in &#39;git push --help&#39; for details.
+Error: Process completed with exit code 1.
+</pre></div>
+</div>
+<p>There’s something that I need to learn about Git.
+I have a misconception that a checkout would get the latest work.</p>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">sphinx-play</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="good-readme.html">Writing a good README</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="good-readme.html" title="next chapter">Project Title</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, me.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
