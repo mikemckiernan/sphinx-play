@@ -11,16 +11,17 @@ Optional: Consider badges, <https://shields.io/>:
 - License
 
 Required: Write a one to three sentence paragraph that identifies what the
-project does and why the project is important.
+project does and how the project solves an academic or business problem.
 
 ## Contents (Optional)
 
-Consider adding a contents section if you have more than 5 level-two headings.
+If you have more than 5 level-two headings and are so inclined, consider adding
+a TOC.
 
 ## Installation (Required)
 
-Specify prerequisites. Indicate which method is simplest or preferred and
-consider saying why.
+Specify prerequisites. Indicate which method is simplest or
+preferred&mdash;ideally say why the method is preferred.
 
 ### Installing _project_ Using Conda
 
@@ -43,20 +44,20 @@ pip install _project_
 
 ### Installing _project_ from Source
 
-Refer to the CONTRIBUTING.md documentation for information
-about installing _project_ from source.
+Refer to the CONTRIBUTING.md documentation for information about installing
+_project_ from source.
 
 ### Running _project_ with Docker
 
 NVIDIA provides _project_ in the Merlin containers that are available from the
-NVIDIA GPU Cloud container registry.
+container registry for NVIDIA GPU Cloud (NGC).
 
 Add the standard table of container images here.
 
 ## Getting Started / First Steps / Using _project_ (Optional)
 
-If it is possible to show a short code sample that demonstrates how to use the
-project, include it here and consider omitting the next heading.
+If you can show a short and runnable code sample that demonstrates how to use
+the project, include it here and consider omitting the next heading.
 
 ```python
 from myproject import SomeClass
@@ -64,10 +65,10 @@ from myproject import SomeClass
 SomeClass.doSomething()
 ```
 
-If it is not possible to provide a short code sample that is runnable, consider
-providing a code sample that highlights the most important classes and
-functions. However, be clear that the code sample is not runnable. Adding
-notebooks or examples under the following heading becomes more important.
+If you cannot provide a short code sample that is runnable, consider providing a
+code sample that highlights the most important classes and functions. However,
+include comments in the code snippet to indicate that important code is omitted.
+Adding notebooks or examples under the following heading becomes more important.
 
 ```python
 import SomeClass as sc
@@ -84,8 +85,7 @@ sc.whazzit(x)
 Specify what is unique or helpful about the notebooks. Consider providing a link
 to the examples directory.
 
-Consider providing a bulleted list with the name of each notebook or directory
-for multi-notebook examples.
+Consider providing a bulleted list with the name of each notebook or a link to the directory for multi-notebook examples.
 
 ## Feedback and Support (Required)
 
