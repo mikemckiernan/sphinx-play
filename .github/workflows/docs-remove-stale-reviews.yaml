@@ -8,4 +8,4 @@ on:
 
 jobs:
   remove:
-    uses: nvidia-merlin/.github/.github/workflows/docs-remove-stale-reviews-common.yaml@main
+    uses: nvidia-merlin/.github/.github/workflows/docs-remove-stale-reviews-common.yaml@docs-chore
