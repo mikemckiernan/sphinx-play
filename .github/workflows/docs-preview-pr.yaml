@@ -3,7 +3,7 @@ name: docs-preview-pr
 on:
   workflow_run:
     workflows: [build]
-    types: [completed]
+    types: [requested]
 
 env:
   WF_ID: ${{ github.event.workflow_run.id }}
