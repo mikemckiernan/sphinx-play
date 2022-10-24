@@ -10,4 +10,4 @@ env:
 
 jobs:
   remove:
-    uses: nvidia-merlin/.github/.github/workflows/docs-preview-pr.yaml@docs-chore
+    uses: nvidia-merlin/.github/.github/workflows/docs-preview-pr-common.yaml@docs-chore
