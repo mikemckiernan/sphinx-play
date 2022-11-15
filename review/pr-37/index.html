@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Proposed automation for documentation &#8212; sphinx-play v0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="proposed-automation-for-documentation">
+<h1>Proposed automation for documentation<a class="headerlink" href="#proposed-automation-for-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="goals">
+<h2>Goals<a class="headerlink" href="#goals" title="Permalink to this headline">¶</a></h2>
+<p>x</p>
+<p>The goal is to add some automation for documentation to GitHub projects.</p>
+<ul class="simple">
+<li><p>When I open a PR, perform the following steps:</p>
+<ul>
+<li><p>Build the HTML documentation as part of the Python build and test workflow.</p></li>
+<li><p>Create a review directory for the PR in GitHub Pages.</p></li>
+<li><p>Add the HTML to the review directory.</p></li>
+<li><p>Update the PR with a comment that includes a review URL.</p></li>
+</ul>
+</li>
+<li><p>When I push updates to a PR, rebuild the documentation and update the review directory in GitHub Pages.</p></li>
+<li><p>When I close a PR, remove the review directory from GitHub Pages.</p></li>
+<li><p>When I merge a PR, rebuild the documentation, and update the <code class="docutils literal notranslate"><span class="pre">main</span></code> directory for GitHub Pages.</p></li>
+</ul>
+<p>Run the workflow for pull requests that are based from the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch only.</p>
+</div>
+<div class="section" id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Enable GitHub Pages, typically on the <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch.</p></li>
+<li><p>Add a <code class="docutils literal notranslate"><span class="pre">.nojekyll</span></code> file to the root directory on the GitHub Pages branch.</p></li>
+</ul>
+</div>
+<div class="section" id="anticipated-implementation">
+<h2>Anticipated implementation<a class="headerlink" href="#anticipated-implementation" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p>Update the workflow that builds the Python project and add a few steps:</p>
+<ul class="simple">
+<li><p>Build the documentation.</p></li>
+<li><p>Store the result of the documentation build  and pull request information
+with <code class="docutils literal notranslate"><span class="pre">actions/upload-artifact</span></code>.</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Make HTML</span><span class="w"></span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
+<span class="w">    </span><span class="no">pushd docs</span><span class="w"></span>
+<span class="w">    </span><span class="no">make html</span><span class="w"></span>
+<span class="w">    </span><span class="no">popd</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload HTML</span><span class="w"></span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v2</span><span class="w"></span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">html-build-artifact</span><span class="w"></span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docs/build/html</span><span class="w"></span>
+<span class="w">    </span><span class="nt">if-no-files-found</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error</span><span class="w"></span>
+<span class="w">    </span><span class="nt">retention-days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Store PR information</span><span class="w"></span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"></span>
+<span class="w">    </span><span class="no">mkdir ./pr</span><span class="w"></span>
+<span class="w">    </span><span class="no">echo ${{ github.event.number }}              &gt; ./pr/pr.txt</span><span class="w"></span>
+<span class="w">    </span><span class="no">echo ${{ github.event.pull_request.merged }} &gt; ./pr/merged.txt</span><span class="w"></span>
+<span class="w">    </span><span class="no">echo ${{ github.event.action }}              &gt; ./pr/action.txt</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload PR information</span><span class="w"></span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v2</span><span class="w"></span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pr</span><span class="w"></span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pr/</span><span class="w"></span>
+</pre></div>
+</div>
+</li>
+</ol>
+<blockquote>
+<div><p>A workflow that triggers on a pull request does not have access to the
+data about the pull request, so the pull request information is stored
+as an artifact to pass the data to the second workflow.</p>
+<p>Storing the pull request information as an artifact has a kludgy feel, but
+seems to be a standard practice. The following two URLs show nearly identical
+content.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#using-data-from-the-triggering-workflow">https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#using-data-from-the-triggering-workflow</a></p></li>
+<li><p><a class="reference external" href="https://securitylab.github.com/research/github-actions-preventing-pwn-requests">https://securitylab.github.com/research/github-actions-preventing-pwn-requests</a></p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p>Add a workflow that is triggered by the build workflow.
+This second workflow downloads the artifacts and updates GitHub Pages.</p>
+<p>It’s kind of dull reading, so peek in <code class="docutils literal notranslate"><span class="pre">.github/workflows/docs-preview-pr.yaml</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As of 08MAR, it seems that the workflow files must be pushed to the <code class="docutils literal notranslate"><span class="pre">main</span></code>
+branch of the repo.
+Two attempts were made to add the workflow files on a pull request.
+On both attempts, the workflow files did not run–that makes some sense
+from the perspective of not running untrusted code.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="security-considerations">
+<h2>Security considerations<a class="headerlink" href="#security-considerations" title="Permalink to this headline">¶</a></h2>
+<p>Because the team uses public repositories, it is important to have the documentation workflow operate for forks.</p>
+<p>Working with forks is a complicating factor for the two goals of adding a comment to the pull request and
+adding HTML to the branch that is used for GitHub Pages.</p>
+<p>The following page shows that a forked repository has <code class="docutils literal notranslate"><span class="pre">read</span></code> access from the <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code> on all
+scopes and specifically for the <code class="docutils literal notranslate"><span class="pre">issues</span></code> and <code class="docutils literal notranslate"><span class="pre">pages</span></code> scopes:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token">https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token</a></p>
+</div></blockquote>
+<p>The proposed method for providing automation for pull requests and limiting risk is shown in the
+following blog:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://securitylab.github.com/research/github-actions-preventing-pwn-requests/">https://securitylab.github.com/research/github-actions-preventing-pwn-requests/</a></p>
+</div></blockquote>
+</div>
+<div class="section" id="questions-and-next-steps">
+<h2>Questions and next steps<a class="headerlink" href="#questions-and-next-steps" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="use-of-secrets-github-token">
+<h3>Use of secrets.GITHUB_TOKEN<a class="headerlink" href="#use-of-secrets-github-token" title="Permalink to this headline">¶</a></h3>
+<p>I felt that it was worthwhile to use the <code class="docutils literal notranslate"><span class="pre">gh</span></code> CLI whenever possible just to reduce complexity.</p>
+<p>I referred to the following documentation from GitHub:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows">https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows</a></p></li>
+<li><p><a class="reference external" href="https://github.blog/2021-03-11-scripting-with-github-cli/">https://github.blog/2021-03-11-scripting-with-github-cli/</a></p></li>
+</ul>
+<p>The GitHub documentation routinely shows the following pattern:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gh ...some-command...</span><span class="w"></span>
+<span class="w">  </span><span class="nt">env</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">GITHUB_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.GITHUB_TOKEN }}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>I need to know if using <code class="docutils literal notranslate"><span class="pre">${{</span> <span class="pre">secrets.GITHUB_TOKEN</span> <span class="pre">}}</span></code> is a deal breaker.</p>
+</div>
+<div class="section" id="preserve-the-review-html-for-a-little-longer">
+<h3>Preserve the review HTML for a little longer<a class="headerlink" href="#preserve-the-review-html-for-a-little-longer" title="Permalink to this headline">¶</a></h3>
+<p>My inclination is to revise the workflow so that it does not delete the
+<code class="docutils literal notranslate"><span class="pre">review/pr-PR_NO</span></code> directory immediately when a pull request is closed.</p>
+<p>I think there is value to leaving the review HTML for a week after a
+pull request is closed.
+It provides a quick way to stare-and-compare between what a pull request
+submitted and the HTML for the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch.</p>
+<p>My proposal is to add a second workflow on a daily schedule that performs
+the following actions:</p>
+<ul class="simple">
+<li><p>Check out the branch that is used for GitHub Pages.</p></li>
+<li><p>Find the directories that are older than a week.</p></li>
+<li><p>Use the pull request number from the directory name to
+query the GitHub API to determine if the related pull request
+is closed.</p></li>
+<li><p>If the pull request is closed, delete the review directory.</p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">sphinx-play</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, me.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
