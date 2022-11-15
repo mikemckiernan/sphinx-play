@@ -8,6 +8,8 @@ Proposed automation for documentation
 Goals
 -----
 
+x
+
 The goal is to add some automation for documentation to GitHub projects.
 
 - When I open a PR, perform the following steps:
